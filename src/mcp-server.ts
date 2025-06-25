@@ -160,12 +160,14 @@ async function initializeServer(): Promise<void> {
     lastUpdated: new Date()
   };
   
-  // Try to load the default file tree
-  try {
-    await buildFileTree(DEFAULT_CONFIG);
-  } catch (error) {
-    log("Failed to build default file tree: " + error);
-  }
+  // PRODUCTION-GRADE FIX: Skip auto-scanning at launch to prevent timeouts
+  // Users can manually trigger scans via create_file_tree tool
+  log("🚀 LAUNCH OPTIMIZATION: Skipping auto-scan at startup to prevent timeouts");
+  log("📝 Use create_file_tree tool to manually scan directories when ready");
+  
+  // Initialize empty state for manual scanning
+  fileTree = null;
+  currentConfig = null;
   
   // Initialize file watcher if enabled in config
   const fileWatchingConfig = getConfig()?.fileWatching;

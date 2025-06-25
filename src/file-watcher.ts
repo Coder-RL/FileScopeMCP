@@ -1,5 +1,6 @@
 import * as chokidar from 'chokidar';
 import * as path from 'path';
+import { minimatch } from 'minimatch';
 import { FileWatchingConfig } from './types.js';
 import { getConfig, getProjectRoot } from './global-state.js';
 import { normalizePath } from './file-utils.js';
@@ -202,10 +203,15 @@ export class FileWatcher {
     const ignoredPatterns = this.getIgnoredPatterns();
     console.error(`FileWatcher: Ignored patterns:`, ignoredPatterns);
 
-    // Check if the file should be ignored
+    // Check if the file should be ignored using glob patterns
     const shouldIgnore = ignoredPatterns.some(pattern => {
-      const regex = typeof pattern === 'string' ? new RegExp(pattern) : pattern;
-      return regex.test(relativePath);
+      if (typeof pattern === 'string') {
+        // Use minimatch for glob pattern matching
+        return minimatch(relativePath, pattern);
+      } else {
+        // Handle RegExp patterns
+        return pattern.test(relativePath);
+      }
     });
 
     console.error(`FileWatcher: Should ignore ${relativePath}? ${shouldIgnore ? 'YES' : 'NO'}`);
